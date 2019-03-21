@@ -65,7 +65,17 @@ func (s *Storey) Leave(numberPlate string) (*Slot, error) {
 		return &Slot{}, ErrParkingAvailable
 	}
 
-	return s.slotList.FindCar(numberPlate)
+	slotFound, err := s.slotList.FindCar(numberPlate)
+	if err != nil {
+		return &Slot{}, ErrCarNotParked
+	}
+
+	slotFound.Leave()
+	if slotFound.prevSlot == nil {
+		s.slotList = slotFound.nextSlot
+	}
+
+	return slotFound, nil	
 }
 
 // OccupancyCount returns the number of slots occupied in this storey.
@@ -86,6 +96,9 @@ func NewStorey(maxSlots int) *Storey {
 
 // Leave - leave the Car, and connect the prev slot with next
 func (s *Slot) Leave() error {
+        if s.prevSlot != nil {
+		s.prevSlot.nextSlot = s.nextSlot
+	}
 	return nil
 }
 
@@ -153,3 +166,17 @@ func NewCar(numberPlate, color string) *Car {
 		color:       color,
 	}
 }
+
+// FindByRegistrationNumber - find the slot which has car with the provided
+// registration number in the storey.
+func (s *Storey) FindByRegistrationNumber(numberPlate string) (*Slot, error) {
+	if s.slotList == nil {
+		return &Slot{}, ErrParkingAvailable
+	}
+
+	return s.slotList.FindCar(numberPlate)
+}
+
+//TO_DO
+// Add feature for Find By Colour.
+
