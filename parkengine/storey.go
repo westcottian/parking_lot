@@ -120,13 +120,16 @@ func (s *Slot) FindCar(numberPlate string) (*Slot, error) {
 func (s *Slot) AddNext(sc *Slot) error {
 	if s.nextSlot == nil {
 		s.nextSlot = sc.UpdatePosition(s.position + 1)
+		sc.prevSlot = s
 		return nil
 	}
 
 	if s.nextSlot.position > (s.position + 1) {
 		currentNext := s.nextSlot
 		s.nextSlot = sc.UpdatePosition(s.position + 1)
+		sc.prevSlot = s
 		sc.nextSlot = currentNext
+		currentNext.prevSlot = sc
 		return nil
 	}
 
@@ -219,4 +222,38 @@ func (s *Slot) FindColor(color string) ([]*Slot, error) {
 	}
 
 	return s.nextSlot.FindColor(color)
+}
+
+// LeaveByPosition - check if the Slot is available
+// if available Create Slot in the vacancy and associate with adjacent slots
+// return Slot
+func (s *Storey) LeaveByPosition(position int) (*Slot, error) {
+	if s.slotList == nil {
+		return &Slot{}, ErrParkingAvailable
+	}
+
+	slotFound, err := s.slotList.FindPosition(position)
+	if err != nil {
+		return &Slot{}, ErrCarNotParked
+	}
+
+	slotFound.Leave()
+	if slotFound.prevSlot == nil {
+		s.slotList = slotFound.nextSlot
+	}
+
+	return slotFound, nil
+}
+
+// FindPosition - finds if the slot has the car or else check in the next slot
+func (s *Slot) FindPosition(position int) (*Slot, error) {
+	if s.position == position {
+		return s, nil
+	}
+
+	if s.nextSlot == nil {
+		return &Slot{}, ErrCarNotParked
+	}
+
+	return s.nextSlot.FindPosition(position)
 }
