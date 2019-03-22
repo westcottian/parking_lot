@@ -5,6 +5,9 @@ import (
 	"log"
 	"os"
 	"strings"
+	"parking_lot/parkengine"
+	"fmt"
+	"strconv"
 )
 
 var (
@@ -23,9 +26,29 @@ func ExecuteFile(filepath string) error {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+
+	db := parkengine.NewStoreyRunTimeDB(0)
+
+	firstLine := true
 	for scanner.Scan() {
-		parseCommand(scanner.Text())
-	}
+		if firstLine {
+			text := scanner.Text()
+			command := parseCommand(text)
+			if command[0] != parkengine.CmdCreateParkingLot {
+				panic("first command needs to be creating the storey")
+			}
+			maxSlots, err := strToInt(command[1])
+			if err != nil {
+				panic(err.Error())
+			}
+			// convert this to a new storey addition or update max slot method
+			db = parkengine.NewStoreyRunTimeDB(maxSlots)
+			firstLine = false
+			continue
+		}
+		fmt.Println(db)	
+	}	
+
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
@@ -50,4 +73,32 @@ func parseCommand(command string) []string {
 	}
 
 	return parsedCommand
+}
+
+// processCommand process each command
+func processCommand(db parkengine.DataStore, command []string) (parkengine.StoreyResponse, error) {
+	switch command[0] {
+	case parkengine.CmdPark:
+		return db.Park(command[1], command[2])
+	case parkengine.CmdCreateParkingLot:
+	case parkengine.CmdStatus:
+	case parkengine.CmdLeave:
+		slotPosition, err := strToInt(command[1])
+		if err != nil {
+			panic(err.Error())
+		}
+		return db.LeaveByPosition(slotPosition)
+	case parkengine.CmdRegistrationNumberByColor:
+	case parkengine.CmdSlotnoByCarColor:
+	case parkengine.CmdSlotnoByRegNumber:
+	default:
+	}
+
+	return parkengine.StoreyResponse{}, nil
+}
+
+// strToInt conver string to integer
+func strToInt(str string) (int, error) {
+	nonFractionalPart := strings.Split(str, ".")
+	return strconv.Atoi(nonFractionalPart[0])
 }

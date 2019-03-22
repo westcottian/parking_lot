@@ -1,4 +1,4 @@
-package models
+package parkengine
 
 type DataStore interface {
 	Park(string, string) (StoreyResponse, error)

@@ -1,4 +1,5 @@
-package models
+package parkengine
+
 
 // storeyDB holds the data in memory while run time.
 // in requirements document multi storey is mentioned.

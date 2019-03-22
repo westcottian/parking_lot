@@ -1,4 +1,4 @@
-package models
+package parkengine
 
 var (
 	// CmdPark command for parking car

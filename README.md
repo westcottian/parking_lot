@@ -1,2 +1,2 @@
 # parking_lot
-GoJek Parking Lot Challeneg
+GoJek Parking Lot Challenge.
