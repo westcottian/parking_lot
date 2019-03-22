@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func PendingExampleExecutableFile() {
+func ExampleExecutableFile() {
 	ExecuteFile("samples/file_input.txt")
 	fmt.Println("")
 }

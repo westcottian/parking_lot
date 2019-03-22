@@ -259,3 +259,43 @@ func TestNewCar(t *testing.T) {
 
 	assert.True(true)
 }
+
+func TestSlot_ListSelf(t *testing.T) {
+	assert := assert.New(t)
+
+	storey := NewStorey(4)
+	storey.Park("numberPlate", "color")
+	sc := NewSlot(NewCar("numberPlate - x", "color - x"), 0)
+	storey.slotList.AddNext(sc)
+	scy := NewSlot(NewCar("numberPlate - y", "color - y"), 0)
+	storey.slotList.AddNext(scy)
+
+	slots := storey.slotList.ListSelf()
+	assert.Equal(3, len(slots))
+	assert.True(true)
+}
+
+func TestStorey_LeaveByPosition(t *testing.T) {
+	assert := assert.New(t)
+
+	storey := NewStorey(4)
+	storey.Park("numberPlate", "color")
+
+	storey.Park("numberPlate - x", "color - x")
+	storey.Park("numberPlate - y", "color - y")
+	storey.Park("numberPlate - z", "color - y")
+	slot, err := storey.Park("numberPlate - s", "color - y")
+	assert.Error(err)
+
+	slot, err = storey.LeaveByPosition(4)
+
+	assert.Equal("numberPlate", storey.slotList.car.numberPlate)
+	assert.Equal("numberPlate - x", storey.slotList.nextSlot.car.numberPlate)
+	assert.Equal(1, storey.slotList.Position())
+	assert.Equal(2, storey.slotList.nextSlot.Position())
+	assert.Equal(4, slot.Position())
+	assert.Equal(3, storey.OccupancyCount())
+	assert.NoError(err)
+
+	assert.True(true)
+}

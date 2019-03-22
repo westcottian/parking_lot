@@ -15,4 +15,5 @@ var (
 	CmdSlotnoByCarColor = "slot_numbers_for_cars_with_colour"
 	// CmdSlotnoByRegNumber command to get slot number of car with reg number.
 	CmdSlotnoByRegNumber = "slot_number_for_registration_number"
+	CmdDispatchRule      = "dispatch_rule"
 )

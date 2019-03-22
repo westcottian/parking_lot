@@ -1,12 +1,18 @@
 package main
 
 import (
-	"parking_lot/parkengine"
+	"flag"
 	"parking_lot/commandsengine"
 )
 
 func main() {
-	parkengine.NewStorey(4)
-	parkengine.NewCar("", "")
-	commandsengine.ExecuteFile("samples/file_input.txt")
+	flag.Parse()
+
+	if len(flag.Args()) > 0 {
+		commandsengine.ExecuteFile(flag.Args()[0])
+		return
+	}
+
+	commandsengine.InteractiveSession()
 }
+

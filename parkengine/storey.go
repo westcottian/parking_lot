@@ -6,8 +6,8 @@ import (
 
 var (
 	ErrParkingFull= errors.New("Parking Full.")
-	ErrParkingAvailable = errors.New("Parking Available.")
-	ErrCarNotParked= errors.New("Car not found.")
+	ErrNoCarsParked = errors.New("Parking Available.")
+	ErrCarNotFound= errors.New("Car not found.")
 	ErrColorNotFound = errors.New("Car with given colour not found.`")
 )
 
@@ -21,7 +21,8 @@ type Slot struct {
 
 type Storey struct {
 	maxSlots int
-	slotList *Slot   //Form LinkList
+	slotList *Slot		//Form Linklist
+	db       *storeyDB
 }
 
 // Car - define the car preoperties
@@ -50,6 +51,7 @@ func (s *Storey) Park(numberPlate, color string) (*Slot, error) {
 		currSlot := s.slotList
 		s.slotList = NewSlot(car, 1)
 		s.slotList.AddNext(currSlot)
+		currSlot.prevSlot = s.slotList
 	}
 
 	slot = NewSlot(car, 0)
@@ -63,12 +65,12 @@ func (s *Storey) Park(numberPlate, color string) (*Slot, error) {
 // return Slot
 func (s *Storey) Leave(numberPlate string) (*Slot, error) {
 	if s.slotList == nil {
-		return &Slot{}, ErrParkingAvailable
+		return &Slot{}, ErrNoCarsParked
 	}
 
 	slotFound, err := s.slotList.FindCar(numberPlate)
 	if err != nil {
-		return &Slot{}, ErrCarNotParked
+		return &Slot{}, ErrCarNotFound
 	}
 
 	slotFound.Leave()
@@ -110,7 +112,7 @@ func (s *Slot) FindCar(numberPlate string) (*Slot, error) {
 	}
 
 	if s.nextSlot == nil {
-		return &Slot{}, ErrCarNotParked
+		return &Slot{}, ErrCarNotFound
 	}
 
 	return s.nextSlot.FindCar(numberPlate)
@@ -175,7 +177,7 @@ func NewCar(numberPlate, color string) *Car {
 // registration number in the storey.
 func (s Storey) FindByRegistrationNumber(numberPlate string) (*Slot, error) {
 	if s.slotList == nil {
-		return &Slot{}, ErrParkingAvailable
+		return &Slot{}, ErrNoCarsParked
 	}
 
 	return s.slotList.FindCar(numberPlate)
@@ -184,21 +186,26 @@ func (s Storey) FindByRegistrationNumber(numberPlate string) (*Slot, error) {
 //TO_DO
 // Add feature for Find By Colour.
 // FindAllByColor find all cars parked with the color
-func (s Storey) FindAllByColor(color string) ([]*Slot, error) {
+func (s Storey) FindAllByColor(color string) ([]Slot, error) {
 	if s.slotList == nil {
-		return []*Slot{}, ErrParkingAvailable
+		return []Slot{}, ErrNoCarsParked
 	}
 
 	slots, err := s.slotList.FindColor(color)
 	if err != nil {
-		return slots, err
+		return []Slot{}, err
 	}
 
 	if len(slots) == 0 {
-		return slots, ErrColorNotFound
+		return []Slot{}, ErrColorNotFound
 	}
 
-	return slots, nil
+	slotsList := []Slot{}
+	// mismatch between []Slot and []*Slot as Resposne should not have []*Slot
+	for i := range slots {
+		slotsList = append(slotsList, *slots[i])
+	}
+	return slotsList, nil
 }
 
 // FindColor find the cars parked with the color specified, and pass the query to next slot.
@@ -229,12 +236,12 @@ func (s *Slot) FindColor(color string) ([]*Slot, error) {
 // return Slot
 func (s *Storey) LeaveByPosition(position int) (*Slot, error) {
 	if s.slotList == nil {
-		return &Slot{}, ErrParkingAvailable
+		return &Slot{}, ErrNoCarsParked
 	}
 
 	slotFound, err := s.slotList.FindPosition(position)
 	if err != nil {
-		return &Slot{}, ErrCarNotParked
+		return &Slot{}, ErrCarNotFound
 	}
 
 	slotFound.Leave()
@@ -252,8 +259,44 @@ func (s *Slot) FindPosition(position int) (*Slot, error) {
 	}
 
 	if s.nextSlot == nil {
-		return &Slot{}, ErrCarNotParked
+		return &Slot{}, ErrCarNotFound
 	}
 
 	return s.nextSlot.FindPosition(position)
+}
+
+// ListSelf list self and help others list themselves
+func (s *Slot) ListSelf() []Slot {
+	if s.nextSlot == nil {
+		return []Slot{*s}
+	}
+
+	return append([]Slot{*s}, s.nextSlot.ListSelf()...)
+}
+
+// AllSlots returns all the slots
+func (s *Storey) AllSlots() ([]Slot, error) {
+	if s.slotList == nil {
+		return []Slot{}, ErrNoCarsParked
+	}
+
+	return s.slotList.ListSelf(), nil
+}
+
+// RegistrationNumber returns the registration number of the car parked in the slot
+func (s Slot) RegistrationNumber() string {
+	if s.car == nil {
+		return ""
+	}
+
+	return s.car.numberPlate
+}
+
+// Color returns the color of the car parked in the slot
+func (s Slot) Color() string {
+	if s.car == nil {
+		return ""
+	}
+
+	return s.car.color
 }
