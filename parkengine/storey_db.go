@@ -55,17 +55,15 @@ func (s *storeyDB) Park(numberPlate, color string) (StoreyResponse, error) {
 			}
 		}
 
-	} else {
-
 	}
+
 	slot, err := s.Storeys[lowestIdx].Park(numberPlate, color)
-	sResponse := StoreyResponse{
+		sResponse := StoreyResponse{
 		slots: []Slot{
 			*slot,
 		},
 		command: CmdPark,
-	}
-
+		}
 	return sResponse, err
 }
 

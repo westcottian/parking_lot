@@ -20,9 +20,9 @@ func (s StoreyResponse) String() string {
 		return fmt.Sprintf("Allocated slot number: %d", s.slots[0].Position())
 	case CmdCreateParkingLot:
 	case CmdStatus:
-		content := fmt.Sprintf("Slot No.\tRegistration No\tColor")
+		content := fmt.Sprintf("Slot No.\tRegistration No \tColor")
 		for _, slot := range s.slots {
-			content += fmt.Sprintf("\n%d %s %s", slot.Position(), slot.RegistrationNumber(), slot.Color())
+			content += fmt.Sprintf("\n%d 		%s 		%s", slot.Position(), slot.RegistrationNumber(), slot.Color())
 		}
 		return content
 	case CmdLeave:
@@ -30,14 +30,13 @@ func (s StoreyResponse) String() string {
 	case CmdRegistrationNumberByColor:
 		regNumbers := []string{}
 		for _, s := range s.slots {
-			regNumbers = append(regNumbers, s.car.numberPlate)
-		}
-
+			regNumbers = append([]string{s.car.numberPlate}, regNumbers...)
+		} 
 		return strings.Join(regNumbers, ", ")
 	case CmdSlotnoByCarColor:
 		positions := []string{}
 		for _, s := range s.slots {
-			positions = append(positions, strconv.Itoa(s.Position()))
+			positions = append([]string{strconv.Itoa(s.Position())}, positions...)
 		}
 
 		return strings.Join(positions, ", ")

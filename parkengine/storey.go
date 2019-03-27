@@ -5,10 +5,10 @@ import (
 )
 
 var (
-	ErrParkingFull= errors.New("Parking Full.")
-	ErrNoCarsParked = errors.New("Parking Available.")
-	ErrCarNotFound= errors.New("Car not found.")
-	ErrColorNotFound = errors.New("Car with given colour not found.`")
+	ErrParkingFull= errors.New("Sorry, parking lot is full.")
+	ErrNoCarsParked = errors.New("No cars parked.")
+	ErrCarNotFound= errors.New("Not found.")
+	ErrColorNotFound = errors.New("Car with specified colour not found.`")
 )
 
 //Slot struct

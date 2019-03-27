@@ -45,11 +45,16 @@ func ExecuteFile(filepath string) error {
 			}
 			// convert this to a new storey addition or update max slot method
 			db = parkengine.NewStoreyRunTimeDB(maxSlots)
-//			fmt.Println(parkengine.NewDbResponse(*db.Storeys[0], parkengine.CmdCreateParkingLot))
+			fmt.Println(parkengine.NewDbResponse(*db.Storeys[0], parkengine.CmdCreateParkingLot))
 			firstLine = false
 			continue
 		}
-		fmt.Println(processCommand(db, parseCommand(scanner.Text())))	
+		StoreyResp, err := processCommand(db, parseCommand(scanner.Text()))
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(StoreyResp)
+		}
 	}	
 
 
@@ -149,11 +154,12 @@ func InteractiveSession() error {
 		commands := parseCommand(text)
 		response, err := processCommand(db, commands)
 		if err != nil {
-		  	fmt.Println("Error processing output commands.") 
+		  	fmt.Println(err) 
+		} else {
+			fmt.Println("\nOutput")
+			fmt.Println(response)
+			command = commands[0]
 		}
-		fmt.Println("\nOutput")
-		fmt.Println(response)
-		command = commands[0]
 	}
 	return nil
 }
